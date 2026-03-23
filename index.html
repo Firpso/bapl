@@ -5,6 +5,8 @@
 <title>Yandex Clone</title>
 
 <style>
+* { box-sizing: border-box; }
+
 body {
     margin: 0;
     height: 100vh;
@@ -25,7 +27,7 @@ body {
     padding: 10px 15px;
     width: 650px;
     gap: 10px;
-    margin-bottom: 40px; /* Отступ до футера */
+    margin-bottom: 20px;
 }
 
 .logo {
@@ -43,9 +45,7 @@ input {
     font-size: 16px;
 }
 
-input::placeholder {
-    color: #aaa;
-}
+input::placeholder { color: #aaa; }
 
 button {
     background: none;
@@ -54,26 +54,311 @@ button {
     color: #ccc;
     font-size: 18px;
 }
-
-button:hover {
-    color: white;
-}
+button:hover { color: white; }
 
 .footer-links {
     display: flex;
     gap: 25px;
     font-size: 14px;
 }
-
 .footer-links a {
     color: #ccc;
     text-decoration: none;
     transition: 0.2s;
 }
+.footer-links a:hover { color: white; }
 
-.footer-links a:hover {
+/* === ВИДЖЕТ ЗАКЛАДОК === */
+.bookmarks-widget {
+    background: #3a3a3a;
+    border-radius: 12px;
+    padding: 15px 20px;
+    width: 650px;
+    margin-top: 10px;
+}
+
+.bookmarks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #555;
+}
+.bookmarks-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+}
+.bookmarks-clear {
+    color: #888;
+    font-size: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.bookmarks-clear:hover { color: #ff5555; }
+
+/* Сетка иконок */
+.bookmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Плитка закладки */
+.bookmark-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.bookmark-icon {
+    width: 64px;
+    height: 64px;
+    background: #2b2b2b;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.bookmark-icon img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    transition: opacity 0.2s;
+}
+
+.bookmark-icon .placeholder {
+    font-size: 28px;
+    color: #666;
+}
+
+.bookmark-tile:hover .bookmark-icon {
+    border-color: #0366d6;
+    background: #252525;
+}
+
+.bookmark-name {
+    font-size: 11px;
+    color: #ccc;
+    text-align: center;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ✏️ Карандаш */
+.bookmark-edit-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    background: #4a4a4a;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    transition: background 0.2s;
+}
+.bookmark-tile:hover .bookmark-edit-btn { display: flex; }
+.bookmark-edit-btn:hover { background: #0366d6; }
+
+/* ➕ Плитка добавления (как в Chrome) */
+.add-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.add-tile .bookmark-icon {
+    background: #3a3a3a;
+    border: 2px dashed #555;
+}
+
+.add-tile:hover .bookmark-icon {
+    border-color: #0366d6;
+    background: #252525;
+}
+
+.add-tile .bookmark-icon::before {
+    content: '+';
+    font-size: 32px;
+    color: #888;
+    font-weight: 300;
+}
+
+.add-tile:hover .bookmark-icon::before {
+    color: #0366d6;
+}
+
+.add-tile .bookmark-name {
+    color: #888;
+    font-size: 11px;
+}
+
+.add-tile:hover .bookmark-name {
+    color: #0366d6;
+}
+
+/* 🎭 МОДАЛЬНОЕ ОКНО */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+.modal-overlay.active { display: flex; }
+
+.modal-content {
+    background: #2b2b2b;
+    border: 1px solid #555;
+    border-radius: 14px;
+    padding: 24px;
+    width: 320px;
+    max-width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    position: relative;
+    animation: modalSlideIn 0.2s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #444;
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+.modal-close:hover { color: white; }
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-row label {
+    font-size: 12px;
+    color: #aaa;
+    font-weight: 500;
+}
+
+.modal-row input {
+    padding: 10px 12px;
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+}
+.modal-row input:focus {
+    outline: 2px solid #0366d6;
+    border-color: transparent;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.modal-actions .save-btn {
+    background: #0366d6;
     color: white;
 }
+.modal-actions .save-btn:hover { background: #0255b3; }
+
+.modal-actions .cancel-btn {
+    background: #4a4a4a;
+    color: white;
+}
+.modal-actions .cancel-btn:hover { background: #5a5a5a; }
+
+/* Пустое состояние */
+.bookmarks-empty {
+    color: #888;
+    font-size: 13px;
+    text-align: center;
+    padding: 20px 10px;
+}
+
+/* Скроллбар */
+.bookmarks-grid::-webkit-scrollbar { width: 4px; }
+.bookmarks-grid::-webkit-scrollbar-track { background: #2b2b2b; border-radius: 2px; }
+.bookmarks-grid::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
+.bookmarks-grid::-webkit-scrollbar-thumb:hover { background: #666; }
 </style>
 </head>
 
@@ -81,15 +366,82 @@ button:hover {
 
 <form class="search-box" action="https://yandex.ru/search/" method="get">
     <div class="logo">Я</div>
-
     <input type="text" name="text" placeholder="Найдётся всё">
-
-    <!-- кнопка картинок -->
     <button type="button" id="imgBtn">📷</button>
-
-    <!-- кнопка поиска -->
     <button type="submit">Найти</button>
 </form>
+
+<!-- === ВИДЖЕТ ЗАКЛАДОК === -->
+<div class="bookmarks-widget">
+    <div class="bookmarks-header">
+        <span class="bookmarks-title">🔖 Закладки</span>
+        <button class="bookmarks-clear" onclick="clearAllBookmarks()">Очистить всё</button>
+    </div>
+    
+    <div class="bookmarks-grid" id="bookmarksGrid">
+        <!-- Иконки закладок + плитка "+" будут здесь -->
+    </div>
+    <div class="bookmarks-empty" id="emptyMsg" style="display:none;">Нажмите + чтобы добавить закладку!</div>
+</div>
+
+<!-- 🎭 МОДАЛЬНОЕ ОКНО -->
+<div class="modal-overlay" id="addModal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title" id="modalTitle">➕ Добавить закладку</span>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="modal-row">
+                <label>URL сайта *</label>
+                <input type="url" id="modalUrl" placeholder="https://example.com">
+            </div>
+            
+            <div class="modal-row">
+                <label>Название (необязательно)</label>
+                <input type="text" id="modalName" placeholder="Например: YouTube">
+            </div>
+            
+            <div class="modal-row">
+                <label>URL иконки (необязательно)</label>
+                <input type="url" id="modalIcon" placeholder="https://example.com/icon.png">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="save-btn" onclick="saveBookmark()">Добавить</button>
+                <button class="cancel-btn" onclick="closeModal()">Отмена</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🎭 МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ -->
+<div class="modal-overlay" id="editModal" onclick="closeEditModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title">✏️ Редактировать закладку</span>
+            <button class="modal-close" onclick="closeEditModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="modal-row">
+                <label>Название</label>
+                <input type="text" id="editName" placeholder="Например: YouTube">
+            </div>
+            
+            <div class="modal-row">
+                <label>URL иконки (необязательно)</label>
+                <input type="url" id="editIcon" placeholder="https://example.com/icon.png">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="save-btn" onclick="saveEdit()">Сохранить</button>
+                <button class="cancel-btn" onclick="deleteBookmark()">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="footer-links">
     <a href="https://yandex.ru/images/" target="_blank">Поиск по картинке</a>
@@ -99,15 +451,13 @@ button:hover {
 </div>
 
 <script>
-// кнопка поиска по картинке
+// === ОРИГИНАЛЬНЫЙ ФУНКЦИОНАЛ ===
 document.getElementById('imgBtn').onclick = () => {
     window.location.href = "https://yandex.ru/images/";
 };
 
-// вставка из буфера
 document.addEventListener('paste', (e) => {
     const items = e.clipboardData.items;
-
     for (let item of items) {
         if (item.type.startsWith("image")) {
             window.location.href = "https://yandex.ru/images/";
@@ -115,6 +465,243 @@ document.addEventListener('paste', (e) => {
         }
     }
 });
+
+// === ЛОГИКА ЗАКЛАДОК ===
+const STORAGE_KEY = 'yandex_clone_bookmarks';
+let activeEditId = null;
+let isEditMode = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderBookmarks();
+    
+    // Закрытие по Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            closeEditModal();
+        }
+    });
+    
+    // Авто-заполнение названия при вводе URL
+    document.getElementById('modalUrl').addEventListener('input', autoFillName);
+});
+
+// Авто-заполнение названия из URL
+function autoFillName() {
+    const urlInput = document.getElementById('modalUrl');
+    const nameInput = document.getElementById('modalName');
+    
+    if (nameInput.value.trim() !== '') return; // Не перезаписывать если уже введено
+    
+    let url = urlInput.value.trim();
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        try {
+            const urlObj = new URL(url);
+            const name = urlObj.hostname.replace('www.', '').split('.')[0];
+            nameInput.value = name.charAt(0).toUpperCase() + name.slice(1);
+        } catch {}
+    }
+}
+
+// Открыть модальное окно добавления
+function openAddModal() {
+    isEditMode = false;
+    document.getElementById('modalTitle').textContent = '➕ Добавить закладку';
+    document.getElementById('modalUrl').value = '';
+    document.getElementById('modalName').value = '';
+    document.getElementById('modalIcon').value = '';
+    document.getElementById('addModal').classList.add('active');
+    document.getElementById('modalUrl').focus();
+}
+
+// Открыть модальное окно редактирования
+function openEditModal(event, id) {
+    event.stopPropagation();
+    isEditMode = true;
+    activeEditId = id;
+    
+    const bookmarks = getBookmarks();
+    const bookmark = bookmarks.find(bm => bm.id === id);
+    if (!bookmark) return;
+    
+    document.getElementById('editName').value = bookmark.name;
+    document.getElementById('editIcon').value = bookmark.customIcon || '';
+    
+    document.getElementById('editModal').classList.add('active');
+    document.getElementById('editName').focus();
+}
+
+// Закрыть модальное окно добавления
+function closeModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('addModal').classList.remove('active');
+}
+
+// Закрыть модальное окно редактирования
+function closeEditModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('editModal').classList.remove('active');
+    activeEditId = null;
+}
+
+// Добавить закладку
+function addBookmark() {
+    const urlInput = document.getElementById('modalUrl');
+    const nameInput = document.getElementById('modalName');
+    const iconInput = document.getElementById('modalIcon');
+    
+    let url = urlInput.value.trim();
+    let name = nameInput.value.trim();
+    let customIcon = iconInput.value.trim() || null;
+    
+    if (!url) { alert('Введите URL сайта'); return; }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+    }
+    
+    let domain;
+    try {
+        const urlObj = new URL(url);
+        domain = urlObj.hostname;
+        if (!name) {
+            name = domain.replace('www.', '').split('.')[0];
+            name = name.charAt(0).toUpperCase() + name.slice(1);
+        }
+    } catch {
+        domain = url;
+        if (!name) name = 'Site';
+    }
+    
+    const bookmarks = getBookmarks();
+    if (bookmarks.some(bm => bm.domain === domain)) {
+        alert('Этот сайт уже в закладках!');
+        return;
+    }
+    
+    bookmarks.unshift({
+        id: Date.now(),
+        url,
+        domain,
+        name,
+        customIcon
+    });
+    
+    saveBookmarks(bookmarks);
+    renderBookmarks();
+    closeModal();
+}
+
+// Сохранить добавление (кнопка в модалке)
+function saveBookmark() {
+    addBookmark();
+}
+
+// Сохранить редактирование
+function saveEdit() {
+    const nameInput = document.getElementById('editName');
+    const iconInput = document.getElementById('editIcon');
+    
+    const newName = nameInput.value.trim();
+    const newIcon = iconInput.value.trim() || null;
+    
+    if (!newName) { alert('Введите название'); return; }
+    
+    let bookmarks = getBookmarks();
+    const idx = bookmarks.findIndex(bm => bm.id === activeEditId);
+    if (idx !== -1) {
+        bookmarks[idx].name = newName;
+        bookmarks[idx].customIcon = newIcon;
+        saveBookmarks(bookmarks);
+        renderBookmarks();
+    }
+    closeEditModal();
+}
+
+// Удалить закладку
+function deleteBookmark() {
+    if (!confirm('Удалить эту закладку?')) return;
+    
+    let bookmarks = getBookmarks();
+    bookmarks = bookmarks.filter(bm => bm.id !== activeEditId);
+    saveBookmarks(bookmarks);
+    renderBookmarks();
+    closeEditModal();
+}
+
+// Получить/сохранить закладки
+function getBookmarks() {
+    try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+    } catch { return []; }
+}
+function saveBookmarks(bookmarks) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
+}
+
+// URL иконки
+function getFaviconUrl(domain, customIcon) {
+    if (customIcon) return customIcon;
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+}
+
+// Отрисовка закладок
+function renderBookmarks() {
+    const grid = document.getElementById('bookmarksGrid');
+    const bookmarks = getBookmarks();
+    
+    grid.innerHTML = '';
+    
+    // Добавляем плитки закладок
+    bookmarks.forEach(bm => {
+        const tile = document.createElement('div');
+        tile.className = 'bookmark-tile';
+        
+        const iconUrl = getFaviconUrl(bm.domain, bm.customIcon);
+        
+        tile.innerHTML = `
+            <div class="bookmark-icon">
+                <img src="${iconUrl}" alt="${bm.name}"
+                     onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'>🌐</span>'">
+                <button class="bookmark-edit-btn" onclick="openEditModal(event, ${bm.id})" title="Редактировать">✏️</button>
+            </div>
+            <span class="bookmark-name">${escapeHtml(bm.name)}</span>
+        `;
+        
+        tile.querySelector('.bookmark-icon').addEventListener('click', (e) => {
+            if (!e.target.closest('.bookmark-edit-btn')) {
+                window.open(bm.url, '_blank');
+            }
+        });
+        
+        grid.appendChild(tile);
+    });
+    
+    // Добавляем плитку "+" в конце
+    const addTile = document.createElement('div');
+    addTile.className = 'add-tile';
+    addTile.onclick = openAddModal;
+    addTile.innerHTML = `
+        <div class="bookmark-icon"></div>
+        <span class="bookmark-name">Добавить</span>
+    `;
+    grid.appendChild(addTile);
+}
+
+// Очистить все
+function clearAllBookmarks() {
+    if (confirm('Удалить ВСЕ закладки?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderBookmarks();
+    }
+}
+
+// Экранирование HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 </script>
 
 </body>
