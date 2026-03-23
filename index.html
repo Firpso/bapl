@@ -494,6 +494,7 @@ button:hover { color: white; }
         <div class="bookmarks-actions">
             <button class="bookmarks-btn" onclick="exportBookmarks()">📤 Экспорт</button>
             <button class="bookmarks-btn" onclick="document.getElementById('importInput').click()">📥 Импорт</button>
+            <button class="bookmarks-btn" onclick="clearIconCache()">🗑️ Кэш иконок</button>
             <button class="bookmarks-btn danger" onclick="clearAllBookmarks()">🗑️ Очистить всё</button>
         </div>
     </div>
@@ -576,7 +577,10 @@ document.addEventListener('paste', (e) => {
     }
 });
 
+// === ХРАНИЛИЩА ===
 const STORAGE_KEY = 'yandex_clone_bookmarks';
+const ICON_CACHE_KEY = 'yandex_clone_icon_cache';
+
 let activeEditId = null;
 let draggedElement = null;
 let draggedId = null;
@@ -584,6 +588,57 @@ let isDragging = false;
 let idCounter = Date.now();
 
 function generateId() { return ++idCounter; }
+
+// === КЭШ ИКОНОК ===
+
+// Получить иконку из кэша
+function getCachedIcon(domain) {
+    try {
+        const cache = JSON.parse(localStorage.getItem(ICON_CACHE_KEY)) || {};
+        return cache[domain] || null;
+    } catch { return null; }
+}
+
+// Сохранить иконку в кэш
+function saveIconToCache(domain, base64Data) {
+    try {
+        const cache = JSON.parse(localStorage.getItem(ICON_CACHE_KEY)) || {};
+        
+        // Ограничиваем кэш 50 иконками (удаляем старые если больше)
+        const keys = Object.keys(cache);
+        if (keys.length >= 50) {
+            delete cache[keys[0]];
+        }
+        
+        cache[domain] = base64Data;
+        localStorage.setItem(ICON_CACHE_KEY, JSON.stringify(cache));
+    } catch (e) {
+        console.warn('Не удалось сохранить иконку в кэш:', e);
+    }
+}
+
+// Очистить кэш иконок
+function clearIconCache() {
+    if (confirm('Очистить кэш иконок? Иконки загрузятся заново при следующем посещении.')) {
+        localStorage.removeItem(ICON_CACHE_KEY);
+        renderBookmarks();
+        showToast('Кэш иконок очищен', 'success');
+    }
+}
+
+// Конвертировать изображение в base64
+function imgToBase64(img) {
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || 64;
+        canvas.height = img.naturalHeight || 64;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        return canvas.toDataURL('image/png');
+    } catch { return null; }
+}
+
+// === ИНИЦИАЛИЗАЦИЯ ===
 
 document.addEventListener('DOMContentLoaded', () => {
     const bookmarks = getBookmarks();
@@ -599,12 +654,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modalUrl').addEventListener('input', autoFillName);
 });
 
+// === УВЕДОМЛЕНИЯ ===
+
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = 'toast show ' + type;
     setTimeout(() => { toast.className = 'toast'; }, 3000);
 }
+
+// === АВТО-ЗАПОЛНЕНИЕ ===
 
 function autoFillName() {
     const urlInput = document.getElementById('modalUrl');
@@ -619,6 +678,8 @@ function autoFillName() {
         } catch {}
     }
 }
+
+// === МОДАЛЬНЫЕ ОКНА ===
 
 function openAddModal() {
     document.getElementById('modalTitle').textContent = '➕ Добавить закладку';
@@ -650,6 +711,8 @@ function closeEditModal(event) {
     document.getElementById('editModal').classList.remove('active');
     activeEditId = null;
 }
+
+// === ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ / УДАЛЕНИЕ ===
 
 function addBookmark() {
     const urlInput = document.getElementById('modalUrl');
@@ -709,6 +772,8 @@ function deleteBookmark() {
     showToast('Удалено', 'success');
 }
 
+// === ХРАНИЛИЩЕ ЗАКЛАДОК ===
+
 function getBookmarks() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
     catch { return []; }
@@ -718,9 +783,23 @@ function saveBookmarks(bookmarks) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
 }
 
+// === ПОЛУЧЕНИЕ ИКОНКИ ===
+
 function getFaviconUrl(domain, customIcon) {
-    return customIcon || `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    // Сначала проверяем кэш
+    if (!customIcon) {
+        const cached = getCachedIcon(domain);
+        if (cached) return cached;
+    }
+    
+    // Если есть кастомная иконка - используем её
+    if (customIcon) return customIcon;
+    
+    // Иначе возвращаем URL для загрузки
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 }
+
+// === ЭКСПОРТ / ИМПОРТ ===
 
 function exportBookmarks() {
     const bookmarks = getBookmarks();
@@ -754,6 +833,8 @@ function importBookmarks(event) {
     reader.readAsText(file);
     event.target.value = '';
 }
+
+// === DRAG & DROP ===
 
 function handleDragStart(e) {
     draggedElement = this;
@@ -798,7 +879,8 @@ function handleDragEnd() {
     isDragging = false;
 }
 
-// ← ИСПРАВЛЕНО: Разные действия для ЛКМ и СКМ
+// === КЛИК ПО ЗАКЛАДКЕ (ЛКМ/СКМ) ===
+
 function handleTileClick(e) {
     if (isDragging) { isDragging = false; return; }
     if (e.target.closest('.bookmark-edit-btn')) return;
@@ -806,18 +888,16 @@ function handleTileClick(e) {
     const bookmark = getBookmarks().find(bm => String(bm.id) === String(this.dataset.id));
     if (!bookmark) return;
     
-    // Левая кнопка (0) → та же вкладка
     if (e.button === 0) {
         window.location.href = bookmark.url;
-    }
-    // Средняя кнопка (1) → новая вкладка
-    else if (e.button === 1) {
+    } else if (e.button === 1) {
         e.preventDefault();
         window.open(bookmark.url, '_blank');
     }
 }
 
-// ← ИСПРАВЛЕНО: Обработка иконок без inline onerror
+// === ОТРИСОВКА ЗАКЛАДОК ===
+
 function renderBookmarks() {
     const grid = document.getElementById('bookmarksGrid');
     const bookmarks = getBookmarks();
@@ -846,8 +926,8 @@ function renderBookmarks() {
         tile.addEventListener('click', handleTileClick);
         
         const iconUrl = getFaviconUrl(bm.domain, bm.customIcon);
+        const isCached = iconUrl.startsWith('data:image');
         
-        // ← Создаём элементы через DOM, не innerHTML
         const iconContainer = document.createElement('div');
         iconContainer.className = 'bookmark-icon';
         
@@ -870,12 +950,20 @@ function renderBookmarks() {
         iconContainer.appendChild(placeholder);
         iconContainer.appendChild(editBtn);
         
-        // ← Обработчик ошибки иконки
-        img.onerror = () => {
-            iconContainer.classList.add('icon-error');
-        };
+        // ← КЭШИРОВАНИЕ: сохраняем иконку после загрузки
         img.onload = () => {
             iconContainer.classList.remove('icon-error');
+            // Если иконка загрузилась с сервера (не из кэша) - сохраняем в кэш
+            if (!isCached && !bm.customIcon) {
+                const base64 = imgToBase64(img);
+                if (base64) {
+                    saveIconToCache(bm.domain, base64);
+                }
+            }
+        };
+        
+        img.onerror = () => {
+            iconContainer.classList.add('icon-error');
         };
         
         const nameSpan = document.createElement('span');
