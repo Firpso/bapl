@@ -1,25 +1,121 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Мой сайт</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #2b2b2b;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    h1 { color: #0366d6; }
-  </style>
+<meta charset="UTF-8">
+<title>Yandex Clone</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: #2b2b2b;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background: #3a3a3a;
+    border-radius: 30px;
+    padding: 10px 15px;
+    width: 650px;
+    gap: 10px;
+    margin-bottom: 40px; /* Отступ до футера */
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 22px;
+    color: #ff3b30;
+}
+
+input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 16px;
+}
+
+input::placeholder {
+    color: #aaa;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ccc;
+    font-size: 18px;
+}
+
+button:hover {
+    color: white;
+}
+
+.footer-links {
+    display: flex;
+    gap: 25px;
+    font-size: 14px;
+}
+
+.footer-links a {
+    color: #ccc;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.footer-links a:hover {
+    color: white;
+}
+</style>
 </head>
+
 <body>
-  <h1>👋 Привет! Мой сайт на GitHub Pages</h1>
-  <p>https://firpso.github.io/bapl/</p>
+
+<form class="search-box" action="https://yandex.ru/search/" method="get">
+    <div class="logo">Я</div>
+
+    <input type="text" name="text" placeholder="Найдётся всё">
+
+    <!-- кнопка картинок -->
+    <button type="button" id="imgBtn">📷</button>
+
+    <!-- кнопка поиска -->
+    <button type="submit">Найти</button>
+</form>
+
+<div class="footer-links">
+    <a href="https://yandex.ru/images/" target="_blank">Поиск по картинке</a>
+    <a href="https://yandex.ru/maps" target="_blank">Карты</a>
+    <a href="https://translate.yandex.ru/" target="_blank">Переводчик</a>
+    <a href="https://translate.yandex.ru/ocr" target="_blank">OCR</a>
+</div>
+
+<script>
+// кнопка поиска по картинке
+document.getElementById('imgBtn').onclick = () => {
+    window.location.href = "https://yandex.ru/images/";
+};
+
+// вставка из буфера
+document.addEventListener('paste', (e) => {
+    const items = e.clipboardData.items;
+
+    for (let item of items) {
+        if (item.type.startsWith("image")) {
+            window.location.href = "https://yandex.ru/images/";
+            return;
+        }
+    }
+});
+</script>
+
 </body>
 </html>
