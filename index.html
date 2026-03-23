@@ -472,10 +472,10 @@ button:hover { color: white; }
 
 <!-- Верхние ссылки -->
 <div class="footer-links">
-    <a href="https://yandex.ru/images/" target="_blank">Поиск по картинке</a>
-    <a href="https://yandex.ru/maps" target="_blank">Карты</a>
-    <a href="https://translate.yandex.ru/" target="_blank">Переводчик</a>
-    <a href="https://translate.yandex.ru/ocr" target="_blank">OCR</a>
+    <a href="https://yandex.ru/images/" >Поиск по картинке</a>
+    <a href="https://yandex.ru/maps" >Карты</a>
+    <a href="https://translate.yandex.ru/" >Переводчик</a>
+    <a href="https://translate.yandex.ru/ocr" >OCR</a>
 </div>
 
 <!-- Поиск + кнопка камеры -->
@@ -578,8 +578,8 @@ button:hover { color: white; }
 <div class="toast" id="toast"></div>
 
 <div class="footer-links" style="margin-top: 20px;">
-    <a href="https://mail.google.com/mail/&ogbl" target="_blank">Google Почта</a>
-    <a href="https://www.google.com/" target="_blank">Google поисковик</a>
+    <a href="https://mail.google.com/mail/&ogbl" >Google Почта</a>
+    <a href="https://www.google.com/" >Google поисковик</a>
 </div>
 
 <script>
@@ -961,7 +961,7 @@ function renderBookmarks() {
         
         tile.querySelector('.bookmark-icon').addEventListener('click', (e) => {
             if (!e.target.closest('.bookmark-edit-btn') && !draggedId) {
-                window.open(bm.url, '_blank');
+                window.location.href = bm.url;
             }
         });
         
