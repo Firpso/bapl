@@ -193,18 +193,24 @@ button:hover { color: white; }
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    cursor: pointer;
+    cursor: grab;
     transition: transform 0.15s, opacity 0.15s;
+    user-select: none;
+}
+
+.bookmark-tile:active {
+    cursor: grabbing;
 }
 
 .bookmark-tile.dragging {
     opacity: 0.5;
     transform: scale(1.05);
-    cursor: grabbing;
+    z-index: 100;
 }
 
 .bookmark-tile.drag-over {
     transform: scale(1.1);
+    border: 2px dashed #0366d6;
 }
 
 .bookmark-icon {
@@ -251,7 +257,7 @@ button:hover { color: white; }
     pointer-events: none;
 }
 
-/* ✎️ Карандаш */
+/* ✏️ Карандаш */
 .bookmark-edit-btn {
     position: absolute;
     top: 4px;
@@ -472,10 +478,10 @@ button:hover { color: white; }
 
 <!-- Верхние ссылки -->
 <div class="footer-links">
-    <a href="https://yandex.ru/images/" >Поиск по картинке</a>
-    <a href="https://yandex.ru/maps" >Карты</a>
-    <a href="https://translate.yandex.ru/" >Переводчик</a>
-    <a href="https://translate.yandex.ru/ocr" >OCR</a>
+    <a href="https://yandex.ru/images/">Поиск по картинке</a>
+    <a href="https://yandex.ru/maps">Карты</a>
+    <a href="https://translate.yandex.ru/">Переводчик</a>
+    <a href="https://translate.yandex.ru/ocr">OCR</a>
 </div>
 
 <!-- Поиск + кнопка камеры -->
@@ -551,7 +557,7 @@ button:hover { color: white; }
 <div class="modal-overlay" id="editModal" onclick="closeEditModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <span class="modal-title">✎️ Редактировать закладку</span>
+            <span class="modal-title">✏️ Редактировать закладку</span>
             <button class="modal-close" onclick="closeEditModal()">&times;</button>
         </div>
         
@@ -578,8 +584,10 @@ button:hover { color: white; }
 <div class="toast" id="toast"></div>
 
 <div class="footer-links" style="margin-top: 20px;">
-    <a href="https://mail.google.com/mail/&ogbl" >Google Почта</a>
-    <a href="https://www.google.com/" >Google поисковик</a>
+    <a href="https://images.google.com/">Google Images</a>
+    <a href="https://translate.google.com/">Google Переводчик</a>
+    <a href="https://mail.google.com/mail/&ogbl">Google Почта</a>
+    <a href="https://www.google.com/">Google Поисковик</a>
 </div>
 
 <script>
@@ -606,8 +614,22 @@ let isEditMode = false;
 // Drag & Drop переменные
 let draggedElement = null;
 let draggedId = null;
+let isDragging = false;
+
+// Генератор уникальных целых ID
+let idCounter = Date.now();
+function generateId() {
+    return ++idCounter;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Инициализируем счётчик ID из существующих закладок
+    const bookmarks = getBookmarks();
+    if (bookmarks.length > 0) {
+        const maxId = Math.max(...bookmarks.map(bm => bm.id));
+        idCounter = maxId;
+    }
+    
     renderBookmarks();
     
     document.addEventListener('keydown', (e) => {
@@ -723,7 +745,7 @@ function addBookmark() {
     }
     
     bookmarks.unshift({
-        id: Date.now(),
+        id: generateId(),  // ← Целое число
         url,
         domain,
         name,
@@ -790,7 +812,6 @@ function getFaviconUrl(domain, customIcon) {
 
 // === ЭКСПОРТ / ИМПОРТ ===
 
-// Экспорт закладок в JSON файл
 function exportBookmarks() {
     const bookmarks = getBookmarks();
     
@@ -819,7 +840,6 @@ function exportBookmarks() {
     showToast(`Экспортировано ${bookmarks.length} закладок`, 'success');
 }
 
-// Импорт закладок из JSON файла
 function importBookmarks(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -829,7 +849,6 @@ function importBookmarks(event) {
         try {
             const data = JSON.parse(e.target.result);
             
-            // Проверка формата
             if (!data.bookmarks || !Array.isArray(data.bookmarks)) {
                 throw new Error('Неверный формат файла');
             }
@@ -837,25 +856,32 @@ function importBookmarks(event) {
             const imported = data.bookmarks;
             const current = getBookmarks();
             
-            // Фильтруем дубликаты по domain
-            let newCount = 0;
-            imported.forEach(bm => {
-                if (!current.some(c => c.domain === bm.domain)) {
-                    current.unshift({
-                        id: Date.now() + Math.random(),
-                        url: bm.url,
-                        domain: bm.domain,
-                        name: bm.name,
-                        customIcon: bm.customIcon || null
-                    });
-                    newCount++;
-                }
-            });
+            const existingDomains = new Set(current.map(bm => bm.domain));
             
-            saveBookmarks(current);
+            // ← ИСПРАВЛЕНО: используем generateId() для целых чисел
+            const newBookmarks = imported
+                .filter(bm => !existingDomains.has(bm.domain))
+                .map(bm => ({
+                    id: generateId(),  // ← Целое число, не дробное!
+                    url: bm.url,
+                    domain: bm.domain,
+                    name: bm.name,
+                    customIcon: bm.customIcon || null
+                }));
+            
+            // Сохраняем порядок из файла импорта
+            const updated = [...newBookmarks, ...current];
+            
+            saveBookmarks(updated);
             renderBookmarks();
             
-            showToast(`Импортировано ${newCount} новых закладок`, 'success');
+            // Обновляем счётчик ID
+            const allBookmarks = getBookmarks();
+            if (allBookmarks.length > 0) {
+                idCounter = Math.max(...allBookmarks.map(bm => bm.id));
+            }
+            
+            showToast(`Импортировано ${newBookmarks.length} новых закладок`, 'success');
             
         } catch (err) {
             showToast('Ошибка импорта: неверный формат файла', 'error');
@@ -868,8 +894,6 @@ function importBookmarks(event) {
     };
     
     reader.readAsText(file);
-    
-    // Сброс input для повторного импорта того же файла
     event.target.value = '';
 }
 
@@ -877,10 +901,15 @@ function importBookmarks(event) {
 
 function handleDragStart(e) {
     draggedElement = this;
-    draggedId = parseInt(this.dataset.id);
+    draggedId = this.dataset.id;  // ← Строка, не parseInt!
+    isDragging = true;
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', draggedId);
+    
+    setTimeout(() => {
+        this.style.opacity = '0.5';
+    }, 0);
 }
 
 function handleDragOver(e) {
@@ -898,18 +927,20 @@ function handleDragLeave(e) {
 
 function handleDrop(e) {
     e.preventDefault();
+    e.stopPropagation();
+    
     this.classList.remove('drag-over');
     
     if (!draggedId || this === draggedElement || this.classList.contains('add-tile')) {
         return;
     }
     
-    const targetId = parseInt(this.dataset.id);
+    const targetId = this.dataset.id;  // ← Строка, не parseInt!
     if (!targetId || targetId === draggedId) return;
     
     let bookmarks = getBookmarks();
-    const draggedIndex = bookmarks.findIndex(bm => bm.id === draggedId);
-    const targetIndex = bookmarks.findIndex(bm => bm.id === targetId);
+    const draggedIndex = bookmarks.findIndex(bm => String(bm.id) === String(draggedId));
+    const targetIndex = bookmarks.findIndex(bm => String(bm.id) === String(targetId));
     
     if (draggedIndex === -1 || targetIndex === -1) return;
     
@@ -918,15 +949,36 @@ function handleDrop(e) {
     
     saveBookmarks(bookmarks);
     renderBookmarks();
+    
+    showToast('Закладка перемещена', 'success');
 }
 
 function handleDragEnd(e) {
+    this.style.opacity = '1';
     this.classList.remove('dragging');
     document.querySelectorAll('.bookmark-tile').forEach(tile => {
         tile.classList.remove('drag-over');
     });
     draggedElement = null;
     draggedId = null;
+    isDragging = false;
+}
+
+// Обработка клика по плитке
+function handleTileClick(e) {
+    if (isDragging) {
+        isDragging = false;
+        return;
+    }
+    
+    if (e.target.closest('.bookmark-edit-btn')) {
+        return;
+    }
+    
+    const bookmark = getBookmarks().find(bm => String(bm.id) === String(this.dataset.id));
+    if (bookmark) {
+        window.open(bookmark.url, '_blank');
+    }
 }
 
 // Отрисовка закладок
@@ -942,11 +994,19 @@ function renderBookmarks() {
         tile.dataset.id = bm.id;
         tile.draggable = true;
         
+        tile.removeEventListener('dragstart', handleDragStart);
+        tile.removeEventListener('dragover', handleDragOver);
+        tile.removeEventListener('dragleave', handleDragLeave);
+        tile.removeEventListener('drop', handleDrop);
+        tile.removeEventListener('dragend', handleDragEnd);
+        tile.removeEventListener('click', handleTileClick);
+        
         tile.addEventListener('dragstart', handleDragStart);
         tile.addEventListener('dragover', handleDragOver);
         tile.addEventListener('dragleave', handleDragLeave);
         tile.addEventListener('drop', handleDrop);
         tile.addEventListener('dragend', handleDragEnd);
+        tile.addEventListener('click', handleTileClick);
         
         const iconUrl = getFaviconUrl(bm.domain, bm.customIcon);
         
@@ -954,16 +1014,10 @@ function renderBookmarks() {
             <div class="bookmark-icon">
                 <img src="${iconUrl}" alt="${bm.name}"
                      onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'>🌐</span>'">
-                <button class="bookmark-edit-btn" onclick="openEditModal(event, ${bm.id})" title="Редактировать">✎️</button>
+                <button class="bookmark-edit-btn" onclick="openEditModal(event, ${bm.id})" title="Редактировать">✏️</button>
             </div>
             <span class="bookmark-name">${escapeHtml(bm.name)}</span>
         `;
-        
-        tile.querySelector('.bookmark-icon').addEventListener('click', (e) => {
-            if (!e.target.closest('.bookmark-edit-btn') && !draggedId) {
-                window.location.href = bm.url;
-            }
-        });
         
         grid.appendChild(tile);
     });
