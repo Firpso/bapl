@@ -19,6 +19,16 @@ body {
     color: white;
 }
 
+.search-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    width: fit-content;
+    margin: 0 auto 20px;
+}
+
 .search-box {
     display: flex;
     align-items: center;
@@ -27,7 +37,9 @@ body {
     padding: 10px 15px;
     width: 650px;
     gap: 10px;
-    margin-bottom: 10px;
+    margin: 0;
+    flex-shrink: 0;
+    position: relative;
 }
 
 .logo {
@@ -56,18 +68,55 @@ button {
 }
 button:hover { color: white; }
 
+/* Кнопка камеры */
+#imgBtn {
+    position: absolute;
+    right: -54px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ccc;
+    transition: all 0.2s;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+#imgBtn:hover {
+    color: white;
+    background: rgba(255,255,255,0.1);
+}
+
+.icon-svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+/* Верхние ссылки */
 .footer-links {
     display: flex;
-    gap: 25px;
-    font-size: 14px;
-    margin-bottom: 40px; /* ← Добавлено: отступ снизу */
+    gap: 20px;
+    font-size: 13px;
+    justify-content: center;
+    margin: 0 0 15px 0;
 }
 .footer-links a {
-    color: #ccc;
+    color: #aaa;
     text-decoration: none;
     transition: 0.2s;
 }
-.footer-links a:hover { color: white; }
+.footer-links a:hover {
+    color: white;
+    text-decoration: underline;
+}
 
 /* === ВИДЖЕТ ЗАКЛАДОК === */
 .bookmarks-widget {
@@ -85,20 +134,47 @@ button:hover { color: white; }
     margin-bottom: 12px;
     padding-bottom: 10px;
     border-bottom: 1px solid #555;
+    flex-wrap: wrap;
+    gap: 10px;
 }
+
 .bookmarks-title {
     font-size: 16px;
     font-weight: bold;
     color: #fff;
 }
-.bookmarks-clear {
-    color: #888;
-    font-size: 12px;
-    background: none;
-    border: none;
-    cursor: pointer;
+
+.bookmarks-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
-.bookmarks-clear:hover { color: #ff5555; }
+
+.bookmarks-btn {
+    font-size: 12px;
+    color: #aaa;
+    background: #2b2b2b;
+    border: 1px solid #555;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.bookmarks-btn:hover {
+    color: white;
+    border-color: #0366d6;
+    background: #252525;
+}
+.bookmarks-btn.danger:hover {
+    color: white;
+    border-color: #ff5555;
+    background: #ff5555;
+}
+
+/* Скрытый input для импорта */
+#importInput {
+    display: none;
+}
 
 /* Сетка иконок */
 .bookmarks-grid {
@@ -150,7 +226,7 @@ button:hover { color: white; }
     height: 40px;
     object-fit: contain;
     transition: opacity 0.2s;
-    pointer-events: none; /* Важно для drag */
+    pointer-events: none;
 }
 
 .bookmark-icon .placeholder {
@@ -368,88 +444,33 @@ button:hover { color: white; }
 .bookmarks-grid::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
 .bookmarks-grid::-webkit-scrollbar-thumb:hover { background: #666; }
 
-/* === КОНТЕЙНЕР: поиск + кнопка === */
-.search-container {
-    display: flex !important;           /* ← Включаем flex */
-    align-items: center;                /* Вертикальное центрирование */
-    justify-content: center;            /* Центрируем всю строку */
-    gap: 10px;                          /* Отступ между поиском и кнопкой */
-    flex-wrap: nowrap !important;       /* ← Запрещаем перенос */
-    width: fit-content;                 /* По содержимому, не 100% */
-    margin: 0 auto 20px;                /* Центрируем + отступ снизу */
-}
-
-/* Поисковая форма — центрирована как была */
-.search-box {
-    display: flex;
-    align-items: center;
+/* Уведомления */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
     background: #3a3a3a;
-    border-radius: 30px;
-    padding: 10px 15px;
-    width: 650px;
-    gap: 10px;
-    margin: 0 auto 10px;    /* ← Центрируем + отступ до футера */
-    position: relative;     /* ← Важно для абсолютного позиционирования кнопки */
-}
-
-/* Кнопка камеры — абсолютно справа от формы */
-#imgBtn {
-    position: absolute;
-    right: -54px;           /* ← Выносим за пределы формы (44px кнопка + 10px отступ) */
-    top: 50%;
-    transform: translateY(-50%);  /* ← Центрируем по вертикали */
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #ccc;
-    transition: all 0.2s;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-#imgBtn:hover {
+    border: 1px solid #555;
     color: white;
-    background: rgba(255,255,255,0.1);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 2000;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
-
-/* SVG иконка */
-.icon-svg {
-    width: 24px;
-    height: 24px;
-    display: block;
+.toast.show {
+    transform: translateX(-50%) translateY(0);
 }
-
+.toast.success { border-color: #4caf50; }
+.toast.error { border-color: #ff5555; }
 </style>
 </head>
 
 <body>
 
-<!-- Общий контейнер для строки поиска -->
-<!-- Общий контейнер: поиск + кнопка камеры -->
-<!-- Поисковая форма с относительным позиционированием -->
-<form class="search-box" action="https://yandex.ru/search/" method="get">
-    <div class="logo">Я</div>
-    <input type="text" name="text" placeholder="Найдётся всё">
-    <button type="submit">Найти</button>
-    
-    <!-- Кнопка камеры внутри формы, но позиционируется абсолютно -->
-    <button type="button" id="imgBtn" class="icon-btn" title="Поиск по картинке">
-        <svg class="icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-            <path fill="currentColor" d="M60,10H49.656l-6.828-6.828C42.078,2.422,41.062,2,40,2H24c-1.062,0-2.078,0.422-2.828,1.172L14.344,10H4
-            c-2.211,0-4,1.789-4,4v44c0,2.211,1.789,4,4,4h56c2.211,0,4-1.789,4-4V14C64,11.789,62.211,10,60,10z M32,50
-            c-8.836,0-16-7.164-16-16s7.164-16,16-16s16,7.164,16,16S40.836,50,32,50z"/>
-            <circle fill="currentColor" cx="32" cy="34" r="8"/>
-        </svg>
-    </button>
-</form>
-
+<!-- Верхние ссылки -->
 <div class="footer-links">
     <a href="https://yandex.ru/images/" target="_blank">Поиск по картинке</a>
     <a href="https://yandex.ru/maps" target="_blank">Карты</a>
@@ -457,17 +478,42 @@ button:hover { color: white; }
     <a href="https://translate.yandex.ru/ocr" target="_blank">OCR</a>
 </div>
 
+<!-- Поиск + кнопка камеры -->
+<div class="search-container">
+    <form class="search-box" action="https://yandex.ru/search/" method="get">
+        <div class="logo">Я</div>
+        <input type="text" name="text" placeholder="Найдётся всё">
+        <button type="submit">Найти</button>
+        
+        <button type="button" id="imgBtn" title="Поиск по картинке">
+            <svg class="icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" d="M60,10H49.656l-6.828-6.828C42.078,2.422,41.062,2,40,2H24c-1.062,0-2.078,0.422-2.828,1.172L14.344,10H4
+                c-2.211,0-4,1.789-4,4v44c0,2.211,1.789,4,4,4h56c2.211,0,4-1.789,4-4V14C64,11.789,62.211,10,60,10z M32,50
+                c-8.836,0-16-7.164-16-16s7.164-16,16-16s16,7.164,16,16S40.836,50,32,50z"/>
+                <circle fill="currentColor" cx="32" cy="34" r="8"/>
+            </svg>
+        </button>
+    </form>
+</div>
+
 <!-- === ВИДЖЕТ ЗАКЛАДОК === -->
 <div class="bookmarks-widget">
     <div class="bookmarks-header">
         <span class="bookmarks-title">🔖 Закладки</span>
-        <button class="bookmarks-clear" onclick="clearAllBookmarks()">Очистить всё</button>
+        <div class="bookmarks-actions">
+            <button class="bookmarks-btn" onclick="exportBookmarks()" title="Скачать закладки">📤 Экспорт</button>
+            <button class="bookmarks-btn" onclick="document.getElementById('importInput').click()" title="Загрузить закладки">📥 Импорт</button>
+            <button class="bookmarks-btn danger" onclick="clearAllBookmarks()" title="Удалить все">🗑️ Очистить всё</button>
+        </div>
     </div>
     
     <div class="bookmarks-grid" id="bookmarksGrid">
         <!-- Иконки закладок + плитка "+" будут здесь -->
     </div>
 </div>
+
+<!-- Скрытый input для импорта -->
+<input type="file" id="importInput" accept=".json" onchange="importBookmarks(event)">
 
 <!-- 🎭 МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ -->
 <div class="modal-overlay" id="addModal" onclick="closeModal(event)">
@@ -528,6 +574,13 @@ button:hover { color: white; }
     </div>
 </div>
 
+<!-- Уведомления -->
+<div class="toast" id="toast"></div>
+
+<div class="footer-links" style="margin-top: 20px;">
+    <a href="https://images.google.com/" target="_blank">Google Images</a>
+    <a href="https://translate.google.com/" target="_blank">Google Переводчик</a>
+</div>
 
 <script>
 // === ОРИГИНАЛЬНЫЙ ФУНКЦИОНАЛ ===
@@ -557,7 +610,6 @@ let draggedId = null;
 document.addEventListener('DOMContentLoaded', () => {
     renderBookmarks();
     
-    // Закрытие по Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeModal();
@@ -565,9 +617,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Авто-заполнение названия при вводе URL
     document.getElementById('modalUrl').addEventListener('input', autoFillName);
 });
+
+// Уведомления
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast show ' + type;
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 3000);
+}
 
 // Авто-заполнение названия из URL
 function autoFillName() {
@@ -637,7 +698,7 @@ function addBookmark() {
     let name = nameInput.value.trim();
     let customIcon = iconInput.value.trim() || null;
     
-    if (!url) { alert('Введите URL сайта'); return; }
+    if (!url) { showToast('Введите URL сайта', 'error'); return; }
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
     }
@@ -657,7 +718,7 @@ function addBookmark() {
     
     const bookmarks = getBookmarks();
     if (bookmarks.some(bm => bm.domain === domain)) {
-        alert('Этот сайт уже в закладках!');
+        showToast('Этот сайт уже в закладках!', 'error');
         return;
     }
     
@@ -672,6 +733,7 @@ function addBookmark() {
     saveBookmarks(bookmarks);
     renderBookmarks();
     closeModal();
+    showToast('Закладка добавлена!', 'success');
 }
 
 function saveBookmark() {
@@ -685,7 +747,7 @@ function saveEdit() {
     const newName = nameInput.value.trim();
     const newIcon = iconInput.value.trim() || null;
     
-    if (!newName) { alert('Введите название'); return; }
+    if (!newName) { showToast('Введите название', 'error'); return; }
     
     let bookmarks = getBookmarks();
     const idx = bookmarks.findIndex(bm => bm.id === activeEditId);
@@ -694,6 +756,7 @@ function saveEdit() {
         bookmarks[idx].customIcon = newIcon;
         saveBookmarks(bookmarks);
         renderBookmarks();
+        showToast('Закладка обновлена!', 'success');
     }
     closeEditModal();
 }
@@ -706,6 +769,7 @@ function deleteBookmark() {
     saveBookmarks(bookmarks);
     renderBookmarks();
     closeEditModal();
+    showToast('Закладка удалена', 'success');
 }
 
 function getBookmarks() {
@@ -724,7 +788,92 @@ function getFaviconUrl(domain, customIcon) {
     return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 }
 
-// === DRAG & DROP ФУНКЦИИ ===
+// === ЭКСПОРТ / ИМПОРТ ===
+
+// Экспорт закладок в JSON файл
+function exportBookmarks() {
+    const bookmarks = getBookmarks();
+    
+    if (bookmarks.length === 0) {
+        showToast('Нет закладок для экспорта', 'error');
+        return;
+    }
+    
+    const data = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        bookmarks: bookmarks
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bookmarks-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast(`Экспортировано ${bookmarks.length} закладок`, 'success');
+}
+
+// Импорт закладок из JSON файла
+function importBookmarks(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // Проверка формата
+            if (!data.bookmarks || !Array.isArray(data.bookmarks)) {
+                throw new Error('Неверный формат файла');
+            }
+            
+            const imported = data.bookmarks;
+            const current = getBookmarks();
+            
+            // Фильтруем дубликаты по domain
+            let newCount = 0;
+            imported.forEach(bm => {
+                if (!current.some(c => c.domain === bm.domain)) {
+                    current.unshift({
+                        id: Date.now() + Math.random(),
+                        url: bm.url,
+                        domain: bm.domain,
+                        name: bm.name,
+                        customIcon: bm.customIcon || null
+                    });
+                    newCount++;
+                }
+            });
+            
+            saveBookmarks(current);
+            renderBookmarks();
+            
+            showToast(`Импортировано ${newCount} новых закладок`, 'success');
+            
+        } catch (err) {
+            showToast('Ошибка импорта: неверный формат файла', 'error');
+            console.error(err);
+        }
+    };
+    
+    reader.onerror = () => {
+        showToast('Ошибка чтения файла', 'error');
+    };
+    
+    reader.readAsText(file);
+    
+    // Сброс input для повторного импорта того же файла
+    event.target.value = '';
+}
+
+// === DRAG & DROP ===
 
 function handleDragStart(e) {
     draggedElement = this;
@@ -758,14 +907,12 @@ function handleDrop(e) {
     const targetId = parseInt(this.dataset.id);
     if (!targetId || targetId === draggedId) return;
     
-    // Перемещаем закладку в массиве
     let bookmarks = getBookmarks();
     const draggedIndex = bookmarks.findIndex(bm => bm.id === draggedId);
     const targetIndex = bookmarks.findIndex(bm => bm.id === targetId);
     
     if (draggedIndex === -1 || targetIndex === -1) return;
     
-    // Удаляем из старого места и вставляем в новое
     const [draggedBookmark] = bookmarks.splice(draggedIndex, 1);
     bookmarks.splice(targetIndex, 0, draggedBookmark);
     
@@ -789,14 +936,12 @@ function renderBookmarks() {
     
     grid.innerHTML = '';
     
-    // Добавляем плитки закладок
     bookmarks.forEach(bm => {
         const tile = document.createElement('div');
         tile.className = 'bookmark-tile';
         tile.dataset.id = bm.id;
-        tile.draggable = true; // Включаем drag
+        tile.draggable = true;
         
-        // Drag & Drop события
         tile.addEventListener('dragstart', handleDragStart);
         tile.addEventListener('dragover', handleDragOver);
         tile.addEventListener('dragleave', handleDragLeave);
@@ -809,13 +954,12 @@ function renderBookmarks() {
             <div class="bookmark-icon">
                 <img src="${iconUrl}" alt="${bm.name}"
                      onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'>🌐</span>'">
-                <button class="bookmark-edit-btn" onclick="openEditModal(event, ${bm.id})" title="Редактировать">✎</button>
+                <button class="bookmark-edit-btn" onclick="openEditModal(event, ${bm.id})" title="Редактировать">✏️</button>
             </div>
             <span class="bookmark-name">${escapeHtml(bm.name)}</span>
         `;
         
-        // Клик по плитке открывает сайт (но не при drag)
-        tile.addEventListener('click', (e) => {
+        tile.querySelector('.bookmark-icon').addEventListener('click', (e) => {
             if (!e.target.closest('.bookmark-edit-btn') && !draggedId) {
                 window.open(bm.url, '_blank');
             }
@@ -824,7 +968,6 @@ function renderBookmarks() {
         grid.appendChild(tile);
     });
     
-    // Добавляем плитку "+" в конце (не перетаскивается)
     const addTile = document.createElement('div');
     addTile.className = 'add-tile';
     addTile.onclick = openAddModal;
@@ -839,6 +982,7 @@ function clearAllBookmarks() {
     if (confirm('Удалить ВСЕ закладки?')) {
         localStorage.removeItem(STORAGE_KEY);
         renderBookmarks();
+        showToast('Все закладки удалены', 'success');
     }
 }
 
