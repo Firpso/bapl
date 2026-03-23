@@ -251,7 +251,7 @@ button:hover { color: white; }
     pointer-events: none;
 }
 
-/* ✏️ Карандаш */
+/* ✎️ Карандаш */
 .bookmark-edit-btn {
     position: absolute;
     top: 4px;
@@ -551,7 +551,7 @@ button:hover { color: white; }
 <div class="modal-overlay" id="editModal" onclick="closeEditModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <span class="modal-title">✏️ Редактировать закладку</span>
+            <span class="modal-title">✎️ Редактировать закладку</span>
             <button class="modal-close" onclick="closeEditModal()">&times;</button>
         </div>
         
@@ -954,7 +954,7 @@ function renderBookmarks() {
             <div class="bookmark-icon">
                 <img src="${iconUrl}" alt="${bm.name}"
                      onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'>🌐</span>'">
-                <button class="bookmark-edit-btn" onclick="openEditModal(event, ${bm.id})" title="Редактировать">✏️</button>
+                <button class="bookmark-edit-btn" onclick="openEditModal(event, ${bm.id})" title="Редактировать">✎️</button>
             </div>
             <span class="bookmark-name">${escapeHtml(bm.name)}</span>
         `;
