@@ -5,6 +5,92 @@
 <title>Yandex Clone</title>
 
 <style>
+/* Стили для кнопки-иконки */
+.icon-btn {
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+}
+
+.icon-btn:hover {
+    background: #4a4a4a;
+    border-color: #0366d6;
+    transform: scale(1.05);
+}
+
+.icon-btn.active {
+    border-color: #4caf50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
+}
+
+.icon-btn.active .icon-text {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.icon-img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
+    filter: brightness(0) invert(1);
+}
+
+.icon-text {
+    font-size: 18px;
+    display: block;
+    line-height: 1;
+}
+
+/* 🔹 1. Скрываем стандартный input file */
+#bgInput { display: none; }
+
+.bg-upload {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 2000;
+}
+
+.bg-upload button {
+    background: #3a3a3a;
+    border: 1px solid #555;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.bg-upload button:hover {
+    background: #4a4a4a;
+}
+
+#bgVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+    display: none;
+}
+
 * { box-sizing: border-box; }
 
 body {
@@ -90,7 +176,7 @@ button:hover { color: white; }
 
 #imgBtn:hover {
     color: white;
-    background: rgba(255,255,255,0.1);
+    background: rgb(0 0 0 / 30%);
 }
 
 .icon-svg {
@@ -99,12 +185,17 @@ button:hover { color: white; }
     display: block;
 }
 
+/* 🔹 3. Полупрозрачный фон для ссылок */
 .footer-links {
     display: flex;
     gap: 20px;
     font-size: 13px;
     justify-content: center;
     margin: 0 0 15px 0;
+    background: rgb(0 0 0 / 30%);
+    backdrop-filter: blur(8px);
+    padding: 8px 16px;
+    border-radius: 12px;
 }
 .footer-links a {
     color: #aaa;
@@ -168,9 +259,7 @@ button:hover { color: white; }
     background: #ff5555;
 }
 
-#importInput {
-    display: none;
-}
+#importInput { display: none; }
 
 .bookmarks-grid {
     display: grid;
@@ -192,20 +281,9 @@ button:hover { color: white; }
     user-select: none;
 }
 
-.bookmark-tile:active {
-    cursor: grabbing;
-}
-
-.bookmark-tile.dragging {
-    opacity: 0.5;
-    transform: scale(1.05);
-    z-index: 100;
-}
-
-.bookmark-tile.drag-over {
-    transform: scale(1.1);
-    border: 2px dashed #0366d6;
-}
+.bookmark-tile:active { cursor: grabbing; }
+.bookmark-tile.dragging { opacity: 0.5; transform: scale(1.05); z-index: 100; }
+.bookmark-tile.drag-over { transform: scale(1.1); border: 2px dashed #0366d6; }
 
 .bookmark-icon {
     width: 64px;
@@ -236,13 +314,8 @@ button:hover { color: white; }
     display: none;
 }
 
-.bookmark-icon.icon-error .placeholder {
-    display: flex !important;
-}
-
-.bookmark-icon.icon-error img {
-    display: none !important;
-}
+.bookmark-icon.icon-error .placeholder { display: flex !important; }
+.bookmark-icon.icon-error img { display: none !important; }
 
 .bookmark-tile:hover .bookmark-icon {
     border-color: #0366d6;
@@ -307,25 +380,13 @@ button:hover { color: white; }
     font-weight: 300;
 }
 
-.add-tile:hover .bookmark-icon::before {
-    color: #0366d6;
-}
-
-.add-tile .bookmark-name {
-    color: #888;
-    font-size: 11px;
-}
-
-.add-tile:hover .bookmark-name {
-    color: #0366d6;
-}
+.add-tile:hover .bookmark-icon::before { color: #0366d6; }
+.add-tile .bookmark-name { color: #888; font-size: 11px; }
+.add-tile:hover .bookmark-name { color: #0366d6; }
 
 .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.7);
     display: none;
     align-items: center;
@@ -361,40 +422,17 @@ button:hover { color: white; }
     border-bottom: 1px solid #444;
 }
 
-.modal-title {
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-}
+.modal-title { font-size: 16px; font-weight: bold; color: #fff; }
 
 .modal-close {
-    background: none;
-    border: none;
-    color: #888;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
+    background: none; border: none; color: #888;
+    font-size: 24px; cursor: pointer; padding: 0; line-height: 1;
 }
 .modal-close:hover { color: white; }
 
-.modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.modal-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.modal-row label {
-    font-size: 12px;
-    color: #aaa;
-    font-weight: 500;
-}
+.modal-body { display: flex; flex-direction: column; gap: 16px; }
+.modal-row { display: flex; flex-direction: column; gap: 6px; }
+.modal-row label { font-size: 12px; color: #aaa; font-weight: 500; }
 
 .modal-row input {
     padding: 10px 12px;
@@ -409,33 +447,15 @@ button:hover { color: white; }
     border-color: transparent;
 }
 
-.modal-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 8px;
-}
-
+.modal-actions { display: flex; gap: 10px; margin-top: 8px; }
 .modal-actions button {
-    flex: 1;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s;
+    flex: 1; padding: 12px; border-radius: 8px;
+    font-size: 14px; font-weight: 500; border: none;
+    cursor: pointer; transition: background 0.2s;
 }
-
-.modal-actions .save-btn {
-    background: #0366d6;
-    color: white;
-}
+.modal-actions .save-btn { background: #0366d6; color: white; }
 .modal-actions .save-btn:hover { background: #0255b3; }
-
-.modal-actions .cancel-btn {
-    background: #4a4a4a;
-    color: white;
-}
+.modal-actions .cancel-btn { background: #4a4a4a; color: white; }
 .modal-actions .cancel-btn:hover { background: #5a5a5a; }
 
 .bookmarks-grid::-webkit-scrollbar { width: 4px; }
@@ -466,6 +486,25 @@ button:hover { color: white; }
 
 <body>
 
+<!-- 🔹 Панель управления фоном -->
+<div class="bg-upload">
+    <input type="file" id="bgInput" accept=".mp4,.jpg,.jpeg,.png">
+    
+    <!-- Кнопка выбора файла с иконкой -->
+    <button onclick="document.getElementById('bgInput').click()" class="icon-btn" title="Выбрать фон">
+        <img src="https://img.icons8.com/?size=100&id=6TpGGZfij7vB&format=png&color=ffffff" alt="📁" class="icon-img">
+    </button>
+    
+    <!-- 🔹 Кнопка: фоновое воспроизведение -->
+    <button id="bgPlayToggle" class="icon-btn" style="display:none;" title="Фоновое воспроизведение: ВЫКЛ">
+        <span class="icon-text">👁️</span>
+    </button>
+    
+    <!-- Кнопка звука -->
+    <button id="soundToggle" style="display:none;">🔊</button>
+</div>
+<video id="bgVideo" autoplay loop muted></video>
+
 <div class="footer-links">
     <a href="https://yandex.ru/images/">Поиск по картинке</a>
     <a href="https://yandex.ru/maps">Карты</a>
@@ -478,7 +517,6 @@ button:hover { color: white; }
         <div class="logo">Я</div>
         <input type="text" name="text" placeholder="Найдётся всё">
         <button type="submit">Найти</button>
-        
         <button type="button" id="imgBtn" title="Поиск по картинке">
             <svg class="icon-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                 <path fill="currentColor" d="M60,10H49.656l-6.828-6.828C42.078,2.422,41.062,2,40,2H24c-1.062,0-2.078,0.422-2.828,1.172L14.344,10H4 c-2.211,0-4,1.789-4,4v44c0,2.211,1.789,4,4,4h56c2.211,0,4-1.789,4-4V14C64,11.789,62.211,10,60,10z M32,50 c-8.836,0-16-7.164-16-16s7.164-16,16-16s16,7.164,16,16S40.836,50,32,50z"/>
@@ -492,10 +530,11 @@ button:hover { color: white; }
     <div class="bookmarks-header">
         <span class="bookmarks-title">🔖 Закладки</span>
         <div class="bookmarks-actions">
-            <button class="bookmarks-btn" onclick="exportBookmarks()">📤 Экспорт</button>
-            <button class="bookmarks-btn" onclick="document.getElementById('importInput').click()">📥 Импорт</button>
+            <button class="bookmarks-btn" onclick="exportBookmarks()">📤 Export</button>
+            <button class="bookmarks-btn" onclick="document.getElementById('importInput').click()">📥 Import</button>
             <button class="bookmarks-btn" onclick="clearIconCache()">🗑️ Кэш иконок</button>
             <button class="bookmarks-btn danger" onclick="clearAllBookmarks()">🗑️ Очистить всё</button>
+            <button class="bookmarks-btn" onclick="resetBackground()">🎨 Сброс фона</button>
         </div>
     </div>
     <div class="bookmarks-grid" id="bookmarksGrid"></div>
@@ -563,6 +602,303 @@ button:hover { color: white; }
 </div>
 
 <script>
+// ============================================
+// 🔹 IndexedDB для видео (большие файлы)
+// ============================================
+const IDB_DB_NAME = 'YandexCloneBG';
+const IDB_STORE_NAME = 'backgrounds';
+const IDB_VERSION = 1;
+
+function openIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(IDB_DB_NAME, IDB_VERSION);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(IDB_STORE_NAME)) {
+                db.createObjectStore(IDB_STORE_NAME, { keyPath: 'id' });
+            }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function saveBackgroundIndexedDB(file) {
+    try {
+        const db = await openIndexedDB();
+        const tx = db.transaction(IDB_STORE_NAME, 'readwrite');
+        const store = tx.objectStore(IDB_STORE_NAME);
+        
+        return new Promise((resolve, reject) => {
+            const request = store.put({
+                id: 'current_bg',
+                data: file,
+                type: file.type,
+                timestamp: Date.now()
+            });
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    } catch (err) {
+        console.error('IndexedDB ошибка:', err);
+        throw err;
+    }
+}
+
+async function loadBackgroundIndexedDB() {
+    try {
+        const db = await openIndexedDB();
+        const tx = db.transaction(IDB_STORE_NAME, 'readonly');
+        const store = tx.objectStore(IDB_STORE_NAME);
+        
+        return new Promise((resolve) => {
+            const request = store.get('current_bg');
+            request.onsuccess = () => {
+                if (!request.result) { resolve(null); return; }
+                resolve(request.result);
+            };
+            request.onerror = () => resolve(null);
+        });
+    } catch (err) {
+        console.error('IndexedDB ошибка:', err);
+        return null;
+    }
+}
+
+async function deleteBackgroundIndexedDB() {
+    try {
+        const db = await openIndexedDB();
+        const tx = db.transaction(IDB_STORE_NAME, 'readwrite');
+        const store = tx.objectStore(IDB_STORE_NAME);
+        store.delete('current_bg');
+    } catch (err) {
+        console.error('IndexedDB ошибка:', err);
+    }
+}
+
+// ============================================
+// 🔹 LocalStorage для изображений (маленькие файлы)
+// ============================================
+const LS_BG_KEY = 'yandex_clone_bg_image';
+const LS_BG_TYPE_KEY = 'yandex_clone_bg_type';
+
+function saveBackgroundLocalStorage(base64Data, type) {
+    try {
+        localStorage.setItem(LS_BG_KEY, base64Data);
+        localStorage.setItem(LS_BG_TYPE_KEY, type);
+    } catch (err) {
+        console.error('LocalStorage ошибка:', err);
+        throw err;
+    }
+}
+
+function loadBackgroundLocalStorage() {
+    try {
+        const data = localStorage.getItem(LS_BG_KEY);
+        const type = localStorage.getItem(LS_BG_TYPE_KEY);
+        if (data && type) {
+            return { data, type };
+        }
+        return null;
+    } catch (err) {
+        console.error('LocalStorage ошибка:', err);
+        return null;
+    }
+}
+
+function deleteBackgroundLocalStorage() {
+    localStorage.removeItem(LS_BG_KEY);
+    localStorage.removeItem(LS_BG_TYPE_KEY);
+}
+
+// ============================================
+// 🔹 Основные переменные
+// ============================================
+const bgInput = document.getElementById('bgInput');
+const bgVideo = document.getElementById('bgVideo');
+const soundToggle = document.getElementById('soundToggle');
+const bgPlayToggle = document.getElementById('bgPlayToggle');
+
+let bgPlayInBackground = false;
+let currentBgObjectUrl = null; // Для очистки URL после загрузки
+
+// ============================================
+// 🔹 Загрузка сохранённого фона при старте
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
+    // Пробуем загрузить видео из IndexedDB
+    const videoData = await loadBackgroundIndexedDB();
+    if (videoData && videoData.type.startsWith('video')) {
+        const url = URL.createObjectURL(videoData.data);
+        currentBgObjectUrl = url;
+        bgVideo.src = url;
+        bgVideo.style.display = 'block';
+        bgVideo.muted = true;
+        bgVideo.play();
+        soundToggle.style.display = 'block';
+        soundToggle.textContent = '🔇';
+        bgPlayToggle.style.display = 'flex';
+        showToast('Видео-фон восстановлен', 'success');
+    } else {
+        // Пробуем загрузить изображение из LocalStorage
+        const imageData = loadBackgroundLocalStorage();
+        if (imageData && imageData.type.startsWith('image')) {
+            document.body.style.background = `url(${imageData.data}) no-repeat center center fixed`;
+            document.body.style.backgroundSize = 'cover';
+            bgVideo.style.display = 'none';
+            soundToggle.style.display = 'none';
+            bgPlayToggle.style.display = 'none';
+            showToast('Изображение-фон восстановлено', 'success');
+        }
+    }
+    
+    // Загружаем закладки
+    const bookmarks = getBookmarks();
+    if (bookmarks.length > 0) {
+        idCounter = Math.max(...bookmarks.map(bm => bm.id));
+    }
+    renderBookmarks();
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { closeModal(); closeEditModal(); }
+    });
+    document.getElementById('modalUrl').addEventListener('input', autoFillName);
+});
+
+// ============================================
+// 🔹 Обработчик выбора файла
+// ============================================
+bgInput.addEventListener('change', async function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+
+    // 🔹 Останавливаем и сбрасываем текущий фон
+    bgVideo.pause();
+    bgVideo.src = "";
+    bgVideo.style.display = "none";
+    soundToggle.style.display = "none";
+    bgPlayToggle.style.display = "none";
+    bgPlayToggle.classList.remove('active');
+    bgPlayInBackground = false;
+    
+    // Очищаем предыдущий Object URL
+    if (currentBgObjectUrl) {
+        URL.revokeObjectURL(currentBgObjectUrl);
+        currentBgObjectUrl = null;
+    }
+    
+    // Сбрасываем фон
+    document.body.style.background = "#2b2b2b";
+    document.body.style.backgroundSize = "";
+    document.body.style.backgroundImage = "";
+
+    // 🔹 Применяем новый фон и сохраняем
+    if (file.type.startsWith('image')) {
+        // 📷 Изображение → LocalStorage
+        document.body.style.background = `url(${url}) no-repeat center center fixed`;
+        document.body.style.backgroundSize = "cover";
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                saveBackgroundLocalStorage(e.target.result, file.type);
+                deleteBackgroundIndexedDB(); // Очищаем видео из IndexedDB
+                showToast('Изображение сохранено', 'success');
+            } catch (err) {
+                showToast('Не удалось сохранить (слишком большое)', 'error');
+            }
+        };
+        reader.readAsDataURL(file);
+        
+    } else if (file.type === 'video/mp4') {
+        // 🎥 Видео → IndexedDB
+        bgVideo.src = url;
+        bgVideo.style.display = "block";
+        bgVideo.muted = true;
+        bgVideo.play();
+        soundToggle.style.display = "block";
+        soundToggle.textContent = "🔇";
+        bgPlayToggle.style.display = "flex";
+        currentBgObjectUrl = url;
+        
+        deleteBackgroundLocalStorage(); // Очищаем изображение из LocalStorage
+        
+        try {
+            await saveBackgroundIndexedDB(file);
+            showToast('Видео сохранено', 'success');
+        } catch (err) {
+            showToast('Не удалось сохранить видео', 'error');
+        }
+    }
+});
+
+// ============================================
+// 🔹 Кнопка звука
+// ============================================
+soundToggle.onclick = () => {
+    bgVideo.muted = !bgVideo.muted;
+    soundToggle.textContent = bgVideo.muted ? "🔇" : "🔊";
+};
+
+// ============================================
+// 🔹 Кнопка фонового воспроизведения
+// ============================================
+bgPlayToggle.onclick = () => {
+    bgPlayInBackground = !bgPlayInBackground;
+    bgPlayToggle.classList.toggle('active', bgPlayInBackground);
+    bgPlayToggle.title = `Фоновое воспроизведение: ${bgPlayInBackground ? 'ВКЛ' : 'ВЫКЛ'}`;
+    showToast(`Фон: ${bgPlayInBackground ? 'включён' : 'выключен'}`, 'success');
+};
+
+// ============================================
+// 🔹 Отслеживание активности вкладки
+// ============================================
+document.addEventListener('visibilitychange', () => {
+    if (bgVideo.style.display === 'block' && bgVideo.src) {
+        if (document.hidden && !bgPlayInBackground) {
+            bgVideo.pause();
+        } else if (!document.hidden && bgVideo.paused) {
+            bgVideo.play();
+        }
+    }
+});
+
+// ============================================
+// 🔹 Сброс фона
+// ============================================
+function resetBackground() {
+    if (confirm('Сбросить пользовательский фон и вернуть стандартный?')) {
+        // Очищаем хранилища
+        deleteBackgroundLocalStorage();
+        deleteBackgroundIndexedDB();
+        
+        // Сбрасываем визуальный фон
+        document.body.style.background = "#2b2b2b";
+        document.body.style.backgroundSize = "";
+        document.body.style.backgroundImage = "";
+        
+        // Останавливаем видео
+        bgVideo.pause();
+        bgVideo.src = "";
+        bgVideo.style.display = "none";
+        soundToggle.style.display = "none";
+        bgPlayToggle.style.display = "none";
+        
+        // Очищаем Object URL
+        if (currentBgObjectUrl) {
+            URL.revokeObjectURL(currentBgObjectUrl);
+            currentBgObjectUrl = null;
+        }
+        
+        showToast('Фон сброшен', 'success');
+    }
+}
+
+// ============================================
+// 🔹 Поиск по картинке
+// ============================================
 document.getElementById('imgBtn').onclick = () => {
     window.location.href = "https://yandex.ru/images/";
 };
@@ -577,7 +913,9 @@ document.addEventListener('paste', (e) => {
     }
 });
 
-// === ХРАНИЛИЩА ===
+// ============================================
+// 🔹 Закладки (LocalStorage)
+// ============================================
 const STORAGE_KEY = 'yandex_clone_bookmarks';
 const ICON_CACHE_KEY = 'yandex_clone_icon_cache';
 
@@ -589,9 +927,6 @@ let idCounter = Date.now();
 
 function generateId() { return ++idCounter; }
 
-// === КЭШ ИКОНОК ===
-
-// Получить иконку из кэша
 function getCachedIcon(domain) {
     try {
         const cache = JSON.parse(localStorage.getItem(ICON_CACHE_KEY)) || {};
@@ -599,17 +934,13 @@ function getCachedIcon(domain) {
     } catch { return null; }
 }
 
-// Сохранить иконку в кэш
 function saveIconToCache(domain, base64Data) {
     try {
         const cache = JSON.parse(localStorage.getItem(ICON_CACHE_KEY)) || {};
-        
-        // Ограничиваем кэш 50 иконками (удаляем старые если больше)
         const keys = Object.keys(cache);
         if (keys.length >= 50) {
             delete cache[keys[0]];
         }
-        
         cache[domain] = base64Data;
         localStorage.setItem(ICON_CACHE_KEY, JSON.stringify(cache));
     } catch (e) {
@@ -617,16 +948,16 @@ function saveIconToCache(domain, base64Data) {
     }
 }
 
-// Очистить кэш иконок
 function clearIconCache() {
-    if (confirm('Очистить кэш иконок? Иконки загрузятся заново при следующем посещении.')) {
+    if (confirm('Очистить кэш иконок? Иконки загрузятся заново при следующем обновлении страницы.')) {
         localStorage.removeItem(ICON_CACHE_KEY);
-        renderBookmarks();
-        showToast('Кэш иконок очищен', 'success');
+        const bookmarks = getBookmarks();
+        bookmarks.forEach(bm => { delete bm.cachedIcon; });
+        saveBookmarks(bookmarks);
+        location.reload();
     }
 }
 
-// Конвертировать изображение в base64
 function imgToBase64(img) {
     try {
         const canvas = document.createElement('canvas');
@@ -638,32 +969,12 @@ function imgToBase64(img) {
     } catch { return null; }
 }
 
-// === ИНИЦИАЛИЗАЦИЯ ===
-
-document.addEventListener('DOMContentLoaded', () => {
-    const bookmarks = getBookmarks();
-    if (bookmarks.length > 0) {
-        idCounter = Math.max(...bookmarks.map(bm => bm.id));
-    }
-    renderBookmarks();
-    
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { closeModal(); closeEditModal(); }
-    });
-    
-    document.getElementById('modalUrl').addEventListener('input', autoFillName);
-});
-
-// === УВЕДОМЛЕНИЯ ===
-
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = 'toast show ' + type;
     setTimeout(() => { toast.className = 'toast'; }, 3000);
 }
-
-// === АВТО-ЗАПОЛНЕНИЕ ===
 
 function autoFillName() {
     const urlInput = document.getElementById('modalUrl');
@@ -678,8 +989,6 @@ function autoFillName() {
         } catch {}
     }
 }
-
-// === МОДАЛЬНЫЕ ОКНА ===
 
 function openAddModal() {
     document.getElementById('modalTitle').textContent = '➕ Добавить закладку';
@@ -712,8 +1021,6 @@ function closeEditModal(event) {
     activeEditId = null;
 }
 
-// === ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ / УДАЛЕНИЕ ===
-
 function addBookmark() {
     const urlInput = document.getElementById('modalUrl');
     const nameInput = document.getElementById('modalName');
@@ -733,8 +1040,9 @@ function addBookmark() {
     } catch { domain = url; if (!name) name = 'Site'; }
     
     const bookmarks = getBookmarks();
-    if (bookmarks.some(bm => bm.domain === domain)) {
-        showToast('Уже есть!', 'error'); return;
+    if (bookmarks.some(bm => bm.url === url)) {
+        showToast('Эта закладка уже есть!', 'error');
+        return;
     }
     
     bookmarks.unshift({ id: generateId(), url, domain, name: name.charAt(0).toUpperCase() + name.slice(1), customIcon });
@@ -772,8 +1080,6 @@ function deleteBookmark() {
     showToast('Удалено', 'success');
 }
 
-// === ХРАНИЛИЩЕ ЗАКЛАДОК ===
-
 function getBookmarks() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
     catch { return []; }
@@ -783,23 +1089,14 @@ function saveBookmarks(bookmarks) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
 }
 
-// === ПОЛУЧЕНИЕ ИКОНКИ ===
-
-function getFaviconUrl(domain, customIcon) {
-    // Сначала проверяем кэш
-    if (!customIcon) {
-        const cached = getCachedIcon(domain);
-        if (cached) return cached;
-    }
-    
-    // Если есть кастомная иконка - используем её
+function getFaviconUrl(domain, customIcon, cachedIcon, forceReload = false) {
     if (customIcon) return customIcon;
-    
-    // Иначе возвращаем URL для загрузки
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    if (cachedIcon) return cachedIcon;
+    const cached = getCachedIcon(domain);
+    if (cached && !forceReload) return cached;
+    const timestamp = Date.now();
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64&_t=${timestamp}`;
 }
-
-// === ЭКСПОРТ / ИМПОРТ ===
 
 function exportBookmarks() {
     const bookmarks = getBookmarks();
@@ -821,8 +1118,8 @@ function importBookmarks(event) {
             const data = JSON.parse(e.target.result);
             if (!data.bookmarks) throw new Error();
             const current = getBookmarks();
-            const existing = new Set(current.map(bm => bm.domain));
-            const newones = data.bookmarks.filter(bm => !existing.has(bm.domain)).map(bm => ({
+            const existing = new Set(current.map(bm => bm.url));
+            const newones = data.bookmarks.filter(bm => !existing.has(bm.url)).map(bm => ({
                 id: generateId(), url: bm.url, domain: bm.domain, name: bm.name, customIcon: bm.customIcon || null
             }));
             saveBookmarks([...newones, ...current]);
@@ -833,8 +1130,6 @@ function importBookmarks(event) {
     reader.readAsText(file);
     event.target.value = '';
 }
-
-// === DRAG & DROP ===
 
 function handleDragStart(e) {
     draggedElement = this;
@@ -879,8 +1174,6 @@ function handleDragEnd() {
     isDragging = false;
 }
 
-// === КЛИК ПО ЗАКЛАДКЕ (ЛКМ/СКМ) ===
-
 function handleTileClick(e) {
     if (isDragging) { isDragging = false; return; }
     if (e.target.closest('.bookmark-edit-btn')) return;
@@ -895,8 +1188,6 @@ function handleTileClick(e) {
         window.open(bookmark.url, '_blank');
     }
 }
-
-// === ОТРИСОВКА ЗАКЛАДОК ===
 
 function renderBookmarks() {
     const grid = document.getElementById('bookmarksGrid');
@@ -925,8 +1216,8 @@ function renderBookmarks() {
         tile.addEventListener('dragend', handleDragEnd);
         tile.addEventListener('click', handleTileClick);
         
-        const iconUrl = getFaviconUrl(bm.domain, bm.customIcon);
-        const isCached = iconUrl.startsWith('data:image');
+        const iconUrl = getFaviconUrl(bm.domain, bm.customIcon, bm.cachedIcon, false);
+        const isCached = iconUrl.startsWith('image');
         
         const iconContainer = document.createElement('div');
         iconContainer.className = 'bookmark-icon';
@@ -950,14 +1241,18 @@ function renderBookmarks() {
         iconContainer.appendChild(placeholder);
         iconContainer.appendChild(editBtn);
         
-        // ← КЭШИРОВАНИЕ: сохраняем иконку после загрузки
         img.onload = () => {
             iconContainer.classList.remove('icon-error');
-            // Если иконка загрузилась с сервера (не из кэша) - сохраняем в кэш
             if (!isCached && !bm.customIcon) {
                 const base64 = imgToBase64(img);
                 if (base64) {
                     saveIconToCache(bm.domain, base64);
+                    let bookmarks = getBookmarks();
+                    const idx = bookmarks.findIndex(b => b.id === bm.id);
+                    if (idx !== -1) {
+                        bookmarks[idx].cachedIcon = base64;
+                        saveBookmarks(bookmarks);
+                    }
                 }
             }
         };
